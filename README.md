@@ -2,63 +2,37 @@
 
 ## Introduction / Goal
 
-This project demonstrates core and advanced SQL skills by designing, populating, and querying a relational database for a simple online store. The goal was to model customers, products, orders, and the relationships between them, and then extract meaningful insights using various SQL techniques learned in MySQL. This project covers data definition, data manipulation, querying (simple to complex), and database enhancements like views, indexes, and transactions.
+This project demonstrates core and advanced SQL skills by designing, populating, and querying a relational database for a simple online store using MySQL. The goal was to model customers, products, orders, and the relationships between them, and then extract meaningful insights using various SQL techniques. This project covers data definition, data manipulation, complex querying, and transaction management.
 
 ## Technologies Used
 
 * **Database:** MySQL (Community Server 8.0.x)
 * **Client/IDE:** MySQL Workbench (Version 8.0.x)
-* **SQL Concepts:**
-    * Data Definition Language (DDL): `CREATE TABLE`, Constraints (PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT), `ALTER TABLE`, Data Types (`INT`, `VARCHAR`, `TEXT`, `DATE`, `DATETIME`, `DECIMAL`).
+* **SQL Concepts Demonstrated:**
+    * Data Definition Language (DDL): `CREATE TABLE`, Constraints (PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT), `ALTER TABLE`, Data Types.
     * Data Manipulation Language (DML): `INSERT INTO`, `UPDATE`, `DELETE`.
-    * Querying: `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, Joins (`INNER`, `LEFT`, Self Join), Aggregation (`COUNT`, `SUM`, `AVG`, `MAX`, `MIN`, `GROUP BY`, `HAVING`).
-    * Advanced: Subqueries, Common Table Expressions (CTEs), Window Functions (`LAG`, `SUM`, `AVG`, `RANK`, `ROW_NUMBER` with `OVER()`, Frame Clauses), Views (`CREATE VIEW`), Indexes (`CREATE INDEX`, `EXPLAIN`), Transactions (`BEGIN`, `COMMIT`, `ROLLBACK`, `SET SQL_SAFE_UPDATES`, `LAST_INSERT_ID()`).
-    * Functions: Date (`DATE_FORMAT`, `NOW`, `CURDATE`, `DATE_SUB`), String (`CONCAT`), Conditional (`CASE`).
+    * Querying: `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, Joins (`INNER`, `LEFT`), Aggregation (`COUNT`, `SUM`, `AVG`, `MAX`, `GROUP BY`).
+    * Advanced: Subqueries, Common Table Expressions (CTEs), Window Functions (`LAG` with `OVER()`), Transactions (`BEGIN`, `COMMIT`, `ROLLBACK`, `SET SQL_SAFE_UPDATES`, `LAST_INSERT_ID()`).
+    * Functions: Date (`DATE_FORMAT`, `NOW`, `CURDATE`, `DATE_SUB`), Conditional (`CASE`).
+    * (Syntax for Views and Indexes was practiced but not implemented as separate project enhancements in this version).
 
 ## Schema Overview
 
 The database consists of five main tables designed to capture the core entities and necessary logging:
 
-* **`Customers`**: Stores information about registered customers.
-    * `CustomerID` (PK): Unique identifier for each customer.
-    * `FirstName`, `LastName`: Customer's name.
-    * `DOB`: Date of birth.
-    * `Email` (UNIQUE): Customer's unique email address.
-    * `RegistrationDate`: When the customer registered.
-
-* **`Products`**: Stores information about the items available for sale.
-    * `ProductID` (PK): Unique identifier for each product.
-    * `ProductName`: Name of the product.
-    * `Description`: Detailed description.
-    * `Price`: Current price of the product.
-    * `StockQuantity`: Current number of units in stock.
-
-* **`Orders`**: Stores information about individual orders placed by customers.
-    * `OrderID` (PK): Unique identifier for each order.
-    * `CustomerID` (FK): Links to the `Customers` table.
-    * `OrderDate`: The date and time the order was placed.
-    * `TotalAmount`: The total calculated amount for the order.
-
-* **`OrderItems`**: A linking table detailing which products are included in which orders.
-    * `OrderItemID` (PK): Unique identifier for each line item within an order.
-    * `OrderID` (FK): Links to the `Orders` table.
-    * `ProductID` (FK): Links to the `Products` table.
-    * `Quantity`: The number of units of the specific product ordered.
-    * `PricePerItem`: The price of the product at the time the order was placed.
-
+* **`Customers`**: Stores information about registered customers (ID, Name, DOB, Email, Registration Date).
+* **`Products`**: Stores information about items for sale (ID, Name, Description, Price, Stock).
+* **`Orders`**: Stores header information about customer orders (ID, Customer Link, Date, Total Amount).
+* **`OrderItems`**: Linking table detailing which products are included in which orders (ID, Order Link, Product Link, Quantity, Price at time of order).
 * **`PriceLog`**: Stores a history of price changes for products (created for transaction example).
-    * `LogID` (PK): Unique identifier for the log entry.
-    * `ProductID` (FK): Links to the `Products` table.
-    * `OldPrice`, `NewPrice`: The price before and after the change.
-    * `ChangeTimestamp`: When the price change was logged.
 
 **Relationships:**
-* A `Customer` can place multiple `Orders`.
-* An `Order` belongs to exactly one `Customer`.
-* An `Order` can contain multiple `OrderItems`.
-* A `Product` can be part of multiple `OrderItems`.
-* Each `OrderItem` links one `Order` to one `Product`.
-* `PriceLog` entries link to a `Product`.
+* A `Customer` can place multiple `Orders` (One-to-Many).
+* An `Order` belongs to one `Customer`.
+* An `Order` contains multiple `OrderItems` (One-to-Many).
+* A `Product` can be in multiple `OrderItems`.
+* Each `OrderItem` links one `Order` to one `Product` (resolving the Orders-Products Many-to-Many relationship).
+* `PriceLog` entries link to one `Product`.
 
 *(See the `schema.sql` file for the complete DDL statements).*
 
@@ -70,77 +44,84 @@ The database consists of five main tables designed to capture the core entities 
 4.  Select the database: `USE onlinestore_db;`
 5.  Run the script in **`schema.sql`** to create all the tables and constraints.
 6.  Run the script in **`data_population.sql`** to populate the tables with sample data.
-7.  (Optional) Run the script in **`enhancements.sql`** to create the views and indexes.
-8.  (Optional) Run the script in **`transactions.sql`** to execute the example transactions (note: these modify data).
+7.  (Optional) Execute the example transactions found in **`transactions.sql`** (note: these modify data).
+
+*(The analytical queries are available for reference in `queries.sql`)*.
 
 ## Queries & Analysis
 
 This section showcases various SQL queries used to extract insights from the database. The full queries are in the **`queries.sql`** file.
 
-*(Note: Keep the Query sections as drafted in the previous response (`model_36` or your edited version), ensuring the query code blocks are correctly formatted within the ```sql ... ``` markdown).*
-
-**Example Query Structure:**
-
 **1. Monthly Sales Trend**
 * **Question:** What was the total sales amount for each month?
 * **Technique:** `DATE_FORMAT`, `SUM`, `GROUP BY`, `ORDER BY`.
     ```sql
-    -- Paste corrected SQL query here
-    SELECT
-        DATE_FORMAT(OrderDate, '%Y-%m') AS OrderMonth,
-        SUM(TotalAmount) AS MonthlyTotal
-    FROM Orders
-    GROUP BY OrderMonth
-    ORDER BY OrderMonth ASC;
+    SELECT DATE_FORMAT(OrderDate, '%Y-%m') AS OrderMonth, SUM(TotalAmount) AS MonthlyTotal
+    FROM Orders GROUP BY OrderMonth ORDER BY OrderMonth ASC;
     ```
-*(Repeat this structure for all your analytical queries)*
 
-## Enhancements
-
-The following enhancements were implemented to improve usability and demonstrate advanced concepts. The code is in the **`enhancements.sql`** and **`transactions.sql`** files.
-
-* **Views:** Created to simplify common complex queries.
-    * `CustomerSpending`: Provides total amount spent per customer email.
-        ```sql
-        -- Paste CREATE VIEW CustomerSpending here...
-        CREATE VIEW CustomerSpending AS
-        SELECT c.Email, SUM(o.TotalAmount) AS TotalSpent
-        FROM Customers c
-        INNER JOIN Orders o ON c.CustomerID = o.CustomerID
-        GROUP BY c.CustomerID, c.Email;
-        ```
-    * `NeverOrderedProducts`: Lists products never ordered.
-        ```sql
-        -- Paste CREATE VIEW NeverOrderedProducts here...
-        CREATE VIEW NeverOrderedProducts AS
-        SELECT p.ProductName
-        FROM Products p
-        LEFT JOIN OrderItems oi ON p.ProductID = oi.ProductID
-        WHERE oi.ProductID IS NULL;
-        ```
-
-* **Indexes:** Added to common foreign key and filter columns to improve query performance (essential for larger datasets).
+**2. Highest Order Amount Per Month**
+* **Question:** What was the highest single order amount in each month?
+* **Technique:** `DATE_FORMAT`, `MAX`, `GROUP BY`, `ORDER BY`.
     ```sql
-    -- Paste CREATE INDEX statements here...
-    CREATE INDEX idx_orders_customerid ON Orders (CustomerID);
-    CREATE INDEX idx_orderitems_orderid ON OrderItems (OrderID);
-    CREATE INDEX idx_orderitems_productid ON OrderItems (ProductID);
-    CREATE INDEX idx_products_author ON Products (Author); -- Example if relevant
+    SELECT DATE_FORMAT(OrderDate, '%Y-%m') AS OrderMonth, MAX(TotalAmount) AS MaxOrderAmountInMonth
+    FROM Orders GROUP BY OrderMonth ORDER BY OrderMonth ASC;
     ```
 
-* **Transactions:** Demonstrated atomic operations for placing an order, cancelling an order, and updating a price while logging, ensuring data integrity using `BEGIN`, `COMMIT`, `ROLLBACK`.
+**3. Basic Order Statistics**
+* **Question:** What are the total number of orders, total sales value, and average order value overall?
+* **Technique:** Basic aggregate functions (`COUNT`, `SUM`, `AVG`).
     ```sql
-    -- Paste BEGIN...COMMIT block for placing an order here...
-    BEGIN;
-    INSERT INTO Orders (OrderID, CustomerID, OrderDate, TotalAmount) VALUES (NULL, 2, NOW(), 397.99);
-    INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, LAST_INSERT_ID(), 3, 1, 199.99);
-    INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, LAST_INSERT_ID(), 6, 2, 99.00);
-    UPDATE Products SET StockQuantity = StockQuantity - 1 WHERE ProductID = 3;
-    UPDATE Products SET StockQuantity = StockQuantity - 2 WHERE ProductID = 6;
-    COMMIT;
+    SELECT COUNT(OrderID) AS TotalOrders, SUM(TotalAmount) AS GrandTotalSales, AVG(TotalAmount) AS AverageOrderValue
+    FROM Orders;
     ```
-    *(Consider adding the Cancel Order and Price Log transaction examples as well for completeness)*
 
-## Conclusion
+**4. Specific Period Orders (Jan 2025)**
+* **Question:** Which orders (ID and amount) were placed in January 2025, ordered by highest amount?
+* **Technique:** `WHERE` clause with date range filtering (`BETWEEN`), `ORDER BY`.
+    ```sql
+    SELECT OrderID, TotalAmount FROM Orders
+    WHERE OrderDate BETWEEN '2025-01-01 00:00:00' AND '2025-01-31 23:59:59'
+    ORDER BY TotalAmount DESC;
+    ```
 
-This project served as a practical application of various SQL concepts within a MySQL environment, covering database design, data manipulation, complex querying, and basic enhancements like views, indexes, and transactions.
+**5. Total Quantity Sold Per Product**
+* **Question:** How many units of each product have been sold in total across all orders?
+* **Technique:** `INNER JOIN` (`Products`, `OrderItems`), `SUM()` aggregation, `GROUP BY` product, `ORDER BY`.
+    ```sql
+    SELECT p.ProductName, SUM(oi.Quantity) AS TotalQSold
+    FROM Products p INNER JOIN OrderItems oi ON p.ProductID = oi.ProductID
+    GROUP BY p.ProductID, p.ProductName ORDER BY TotalQSold DESC;
+    ```
+
+**6. Month-over-Month Sales Growth %**
+* **Question:** What was the percentage growth in sales compared to the previous month?
+* **Technique:** CTEs, `DATE_FORMAT`, `SUM`, `GROUP BY`, `LAG` Window Function, `CASE`.
+    ```sql
+    WITH MonthlySalesData AS (
+        SELECT DATE_FORMAT(OrderDate, '%Y-%m') AS OrderMonth, SUM(TotalAmount) AS MonthlySales
+        FROM Orders GROUP BY OrderMonth
+    ), SalesWithLag AS (
+        SELECT msd.*, LAG(MonthlySales, 1, NULL) OVER (ORDER BY OrderMonth ASC) AS PreviousMonthSales
+        FROM MonthlySalesData msd
+    )
+    SELECT OrderMonth, MonthlySales, PreviousMonthSales,
+           CASE WHEN PreviousMonthSales IS NULL OR PreviousMonthSales = 0 THEN NULL
+                ELSE (MonthlySales - PreviousMonthSales) * 100.0 / PreviousMonthSales
+           END AS MoM_Growth_Percent
+    FROM SalesWithLag ORDER BY OrderMonth ASC;
+    ```
+
+## Transaction Examples
+
+The **`transactions.sql`** file contains examples demonstrating how to use `BEGIN`, `COMMIT`, and `ROLLBACK` to ensure atomic operations for common tasks like placing an order, cancelling an order, and logging price changes.
+
+```sql
+-- Example: Placing an Order
+BEGIN;
+INSERT INTO Orders (OrderID, CustomerID, OrderDate, TotalAmount) VALUES (NULL, 2, NOW(), 397.99);
+INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, LAST_INSERT_ID(), 3, 1, 199.99);
+INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, LAST_INSERT_ID(), 6, 2, 99.00);
+UPDATE Products SET StockQuantity = StockQuantity - 1 WHERE ProductID = 3;
+UPDATE Products SET StockQuantity = StockQuantity - 2 WHERE ProductID = 6;
+COMMIT;
