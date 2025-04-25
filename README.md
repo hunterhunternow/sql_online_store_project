@@ -2,19 +2,19 @@
 
 ## Introduction / Goal
 
-This project demonstrates core and advanced SQL skills by designing, populating, and querying a relational database for a simple online store using MySQL. The goal was to model customers, products, orders, and the relationships between them, and then extract meaningful insights using various SQL techniques. This project covers data definition, data manipulation, complex querying, and transaction management.
+This project demonstrates core and advanced SQL skills by designing, populating, and querying a relational database for a simple online store using MySQL. The goal was to model customers, products, orders, and the relationships between them, and then extract meaningful insights using various SQL techniques. This project covers data definition, data manipulation, complex querying, transaction management, and database enhancements like views and indexes.
 
 ## Technologies Used
 
 * **Database:** MySQL (Community Server 8.0.x)
 * **Client/IDE:** MySQL Workbench (Version 8.0.x)
 * **SQL Concepts Demonstrated:**
-    * Data Definition Language (DDL): `CREATE TABLE`, Constraints (PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT), `ALTER TABLE`, Data Types.
+    * Data Definition Language (DDL): `CREATE TABLE`, Constraints (PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT), `ALTER TABLE`, Data Types, `CREATE VIEW`, `CREATE INDEX`.
     * Data Manipulation Language (DML): `INSERT INTO`, `UPDATE`, `DELETE`.
     * Querying: `SELECT`, `WHERE`, `ORDER BY`, `LIMIT`, Joins (`INNER`, `LEFT`), Aggregation (`COUNT`, `SUM`, `AVG`, `MAX`, `GROUP BY`).
     * Advanced: Subqueries, Common Table Expressions (CTEs), Window Functions (`LAG` with `OVER()`), Transactions (`BEGIN`, `COMMIT`, `ROLLBACK`, `SET SQL_SAFE_UPDATES`, `LAST_INSERT_ID()`).
     * Functions: Date (`DATE_FORMAT`, `NOW`, `CURDATE`, `DATE_SUB`), Conditional (`CASE`).
-    * (Syntax for Views and Indexes was practiced but not implemented as separate project enhancements in this version).
+    * Database Enhancements: Views for simplifying complex queries and Indexes for performance optimization (see `enhancements.sql`).
 
 ## Schema Overview
 
@@ -45,12 +45,13 @@ The database consists of five main tables designed to capture the core entities 
 5.  Run the script in **`schema.sql`** to create all the tables and constraints.
 6.  Run the script in **`data_population.sql`** to populate the tables with sample data.
 7.  (Optional) Execute the example transactions found in **`transactions.sql`** (note: these modify data).
+8.  (Optional) Run the script in **`enhancements.sql`** to create analytical views and performance-enhancing indexes, and to see additional analytical queries.
 
-*(The analytical queries are available for reference in `queries.sql`)*.
+*(The initial analytical queries used for development are available for reference in `queries.sql`)*.
 
 ## Queries & Analysis
 
-This section showcases various SQL queries used to extract insights from the database. The full queries are in the **`queries.sql`** file.
+This section showcases various SQL queries used to extract insights from the database during the initial development phase. The full queries are in the **`queries.sql`** file.
 
 **1. Monthly Sales Trend**
 * **Question:** What was the total sales amount for each month?
@@ -106,9 +107,9 @@ This section showcases various SQL queries used to extract insights from the dat
         FROM MonthlySalesData msd
     )
     SELECT OrderMonth, MonthlySales, PreviousMonthSales,
-           CASE WHEN PreviousMonthSales IS NULL OR PreviousMonthSales = 0 THEN NULL
-                ELSE (MonthlySales - PreviousMonthSales) * 100.0 / PreviousMonthSales
-           END AS MoM_Growth_Percent
+            CASE WHEN PreviousMonthSales IS NULL OR PreviousMonthSales = 0 THEN NULL
+                 ELSE (MonthlySales - PreviousMonthSales) * 100.0 / PreviousMonthSales
+            END AS MoM_Growth_Percent
     FROM SalesWithLag ORDER BY OrderMonth ASC;
     ```
 
@@ -120,8 +121,10 @@ The **`transactions.sql`** file contains examples demonstrating how to use `BEGI
 -- Example: Placing an Order
 BEGIN;
 INSERT INTO Orders (OrderID, CustomerID, OrderDate, TotalAmount) VALUES (NULL, 2, NOW(), 397.99);
-INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, LAST_INSERT_ID(), 3, 1, 199.99);
-INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, LAST_INSERT_ID(), 6, 2, 99.00);
+-- Assuming the previous OrderID inserted was, say, 10
+INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, 10, 3, 1, 199.99);
+INSERT INTO OrderItems (OrderItemID, OrderID, ProductID, Quantity, PricePerItem) VALUES (NULL, 10, 6, 2, 99.00);
+-- Note: Using LAST_INSERT_ID() is preferable if running these sequentially in one session
 UPDATE Products SET StockQuantity = StockQuantity - 1 WHERE ProductID = 3;
 UPDATE Products SET StockQuantity = StockQuantity - 2 WHERE ProductID = 6;
 COMMIT;
